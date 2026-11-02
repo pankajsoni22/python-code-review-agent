@@ -1,28 +1,39 @@
 from code_review_agent.config.settings import settings
-from langchain_core.messages import (
-    SystemMessage,
-    HumanMessage
-)
-
-from code_review_agent.chains.code_review import build_code_review_chain
+from code_review_agent.graph.workflow import build_review_graph
 
 def main() -> None:
-    chain = build_code_review_chain()
+    graph = build_review_graph()
     python_code = """
-    def calculate_average(numbers: list[float]) -> float:
-        if not numbers:
-            raise ValueError("Numbers cannot be empty")
+    def find_duplicates(items):
+        duplicates = []
 
-        return sum(numbers) / len(numbers)
+        for i in range(len(items)):
+            for j in range(i + 1, len(items)):
+                if items[i] == items[j] and items[i] not in duplicates:
+                    duplicates.append(items[i])
+
+        return duplicates
     """
-    
+    initial_state = {
+        "code": python_code,
+        "review_report": None
+    }
 
-    response = chain.invoke(
-        {
-            "code": python_code
-        }
-    )
-    print(response.model_dump_json(indent=2))
+    response = graph.invoke(initial_state)
+    report = response["review_report"]
+    print("\nCODE REVIEW REPORT")
+    print("==================")
+
+    print(f"\nSummary: {report.summary}")
+    print(f"Assessment: {report.overall_assessment}")
+
+    for finding in report.findings:
+        print(f"\n[{finding.severity.upper()}] {finding.title}")
+        print(f"Category: {finding.category}")
+        print(f"Description: {finding.description}")
+        print(f"Recommendation: {finding.recommendation}")
+
+    print(response['review_report'])
 
 if __name__ == "__main__":
     main()
