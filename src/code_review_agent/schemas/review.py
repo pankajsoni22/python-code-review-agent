@@ -1,6 +1,7 @@
-from typing import Literal
+from typing import Literal, Annotated
 
 from pydantic import BaseModel, Field
+
 
 class ReviewFinding(BaseModel):
     category: Literal[
@@ -30,9 +31,14 @@ class ReviewFinding(BaseModel):
         description="Relevant source code line number, if identifiable"
     )
 
+class ReviewFindings(BaseModel):
+    findings: list[ReviewFinding] = Field(
+        default_factory=list,
+        description="Finding identified by this specialized reviewer"
+    )
 
 class ReviewReport(BaseModel):
-    summary: str = Field(description="Overall summary of the code reivew")
+    summary: Annotated[str, Field(description="Overall summary of the code reivew")]
     
     findings: list[ReviewFinding] = Field(
         default_factory=list, 

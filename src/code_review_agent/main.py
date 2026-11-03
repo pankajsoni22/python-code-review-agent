@@ -16,7 +16,11 @@ def main() -> None:
     """
     initial_state = {
         "code": python_code,
-        "review_report": None
+        "analysis_context": None,
+        "bug_findings": [],
+        "performance_findings": [],
+        "security_findings": [],
+        "review_report": None,
     }
 
     response = graph.invoke(initial_state)
